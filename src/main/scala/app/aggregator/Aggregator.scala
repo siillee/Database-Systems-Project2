@@ -29,12 +29,12 @@ class Aggregator(sc : SparkContext) extends Serializable {
     val zeroRatingsTmp = titleId.subtract(ratingsId)
     val zeroRatings =  zeroRatingsTmp.map(el => (el, (0.0, 0)))
 
-    val aggregated = new PairRDDFunctions(ratings.groupBy(el => el._2)).aggregateByKey((0.0, 0))((a, b) => {
-                                                                                            var sum = 0.0;
-                                                                                            b.foreach(x => sum = sum + x._4)
-                                                                                            (a._1 + sum, a._2 + b.size)
-                                                                                          },
-                                                                                          (c, d) => (c._1 + d._1, c._2 + d._2)).union(zeroRatings)
+    val aggregated = new PairRDDFunctions(ratings.groupBy(el => el._2))
+      .aggregateByKey((0.0, 0))((a, b) => {
+        var sum = 0.0
+        b.foreach(x => sum = sum + x._4)
+        (a._1 + sum, a._2 + b.size)
+      }, (c, d) => (c._1 + d._1, c._2 + d._2)).union(zeroRatings)
 
     state = aggregated.join(title.keyBy(el => el._1)).map(el => (el._1, el._2._2._2, el._2._1, el._2._2._3))
     state.persist()
@@ -47,16 +47,13 @@ class Aggregator(sc : SparkContext) extends Serializable {
    */
   def getResult() : RDD[(String, Double)] = {
 
-    val res = state.map(el => {
+    state.map(el => {
       if (el._3._2 == 0) {
         (el._2, 0.0)
       }else {
         (el._2, el._3._1 / el._3._2)
       }
     })
-    res.foreach(x => println(x))
-    println()
-    res
   }
 
   /**
@@ -96,7 +93,6 @@ class Aggregator(sc : SparkContext) extends Serializable {
   def updateResult(delta_ : Array[(Int, Int, Option[Double], Double, Int)]) : Unit = {
 
     state.unpersist()
-    delta_.foreach(x => println(x))
     val delta = delta_.groupBy(el => el._2)
     state = state.map(el => {
       var deltaSum = 0.0

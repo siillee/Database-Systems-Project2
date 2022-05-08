@@ -29,7 +29,13 @@ class LSHIndex(data: RDD[(Int, String, List[String])], seed : IndexedSeq[Int]) e
    * @return Data structure of LSH index
    */
   def getBuckets()
-    : RDD[(IndexedSeq[Int], List[(Int, String, List[String])])] = ???
+    : RDD[(IndexedSeq[Int], List[(Int, String, List[String])])] = {
+
+    // distinct() is needed because there is a chance to have same films appear twice due to the way I keyed and joined the elements
+    val hashed = hash(data.map(el => el._3)).keyBy(el => el._2).map(el => (el._1, el._2._1)).join(data.keyBy(el => el._3)).distinct()
+
+    hashed.map(el => (el._2._1, el._2._2)).groupBy(el => el._1).map(el => (el._1, el._2.map(x => x._2).toList))
+  }
 
   /**
    * Lookup operation on the LSH index
@@ -40,5 +46,8 @@ class LSHIndex(data: RDD[(Int, String, List[String])], seed : IndexedSeq[Int]) e
    *         If no match exists in the LSH index, return an empty result list.
    */
   def lookup[T: ClassTag](queries: RDD[(IndexedSeq[Int], T)])
-  : RDD[(IndexedSeq[Int], T, List[(Int, String, List[String])])] = ???
+  : RDD[(IndexedSeq[Int], T, List[(Int, String, List[String])])] = {
+
+    queries.join(getBuckets()).map(el => (el._1, el._2._1, el._2._2))
+  }
 }

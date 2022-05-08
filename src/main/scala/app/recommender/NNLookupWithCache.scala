@@ -4,27 +4,37 @@ import org.apache.spark.SparkContext
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
 
+import scala.collection.mutable
+
 /**
  * Class for performing LSH lookups (enhanced with cache)
  *
  * @param lshIndex A constructed LSH index
  */
 class NNLookupWithCache(lshIndex : LSHIndex) extends Serializable {
-  var cache = null
-
+  var cache : Broadcast[Map[IndexedSeq[Int], List[(Int, String, List[String])]]] = null
+  var histogram : mutable.Map[IndexedSeq[Int], Int] = mutable.Map[IndexedSeq[Int], Int]()
   /**
    * The operation for building the cache
    *
    * @param sc Spark context for current application
    */
-  def build(sc : SparkContext) = ???
+  def build(sc : SparkContext) = {
+
+    val frequent = histogram.filter(el => el._2 / histogram.size > 0.01).keys.toList
+    val data = lshIndex.getBuckets()
+    cache = sc.broadcast(data.filter(el => frequent.contains(el._1)).collect().toMap)
+  }
 
   /**
    * Testing operation: force a cache based on the given object
    *
    * @param ext A broadcast map that contains the objects to cache
    */
-  def buildExternal(ext : Broadcast[Map[IndexedSeq[Int], List[(Int, String, List[String])]]]) = ???
+  def buildExternal(ext : Broadcast[Map[IndexedSeq[Int], List[(Int, String, List[String])]]]) = {
+
+    cache = ext
+  }
 
   /**
    * Lookup operation on cache
@@ -37,7 +47,30 @@ class NNLookupWithCache(lshIndex : LSHIndex) extends Serializable {
    *         need to be directed to LSH
    */
   def cacheLookup(queries: RDD[List[String]])
-  : (RDD[(List[String], List[(Int, String, List[String])])], RDD[(IndexedSeq[Int], List[String])]) = ???
+  : (RDD[(List[String], List[(Int, String, List[String])])], RDD[(IndexedSeq[Int], List[String])]) = {
+
+    val sc = queries.sparkContext
+    val hashed = lshIndex.hash(queries)
+
+    if (cache == null){
+      return (null, hashed)
+    }
+    // Updating the histogram
+    hashed.foreach(el => {
+      if (!histogram.contains(el._1)) {
+       histogram += ((el._1, 0))
+      }
+      histogram(el._1) = histogram(el._1) + 1
+    })
+
+    val hashedList = hashed.collect().toList
+    val cacheMap = cache.value
+
+    val hit = sc.makeRDD(hashedList.filter(el => cacheMap.contains(el._1)).map(el => (el._2, cacheMap(el._1))))
+    val missed = sc.parallelize(hashedList.filter(el => !cacheMap.contains(el._1)))
+
+    (hit, missed)
+  }
 
   /**
    * Lookup operation for queries
@@ -46,5 +79,15 @@ class NNLookupWithCache(lshIndex : LSHIndex) extends Serializable {
    * @return The RDD of (keyword list, resut) pairs
    */
   def lookup(queries: RDD[List[String]])
-  : RDD[(List[String], List[(Int, String, List[String])])] = ???
+  : RDD[(List[String], List[(Int, String, List[String])])] = {
+
+    val cacheLookupResult = cacheLookup(queries)
+    val missedLookup = lshIndex.lookup(cacheLookupResult._2)
+
+    if (cacheLookupResult._1 == null){
+      return missedLookup.map(el => (el._2, el._3))
+    }
+
+    cacheLookupResult._1.union(missedLookup.map(el => (el._2, el._3)))
+  }
 }

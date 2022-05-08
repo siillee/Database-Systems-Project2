@@ -4,8 +4,6 @@ import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
 import java.io.File
-import scala.collection.mutable.ListBuffer
-import scala.io.Source
 
 /**
  * Helper class for loading the input
@@ -22,10 +20,8 @@ class RatingsLoader(sc : SparkContext, path : String) extends Serializable {
    */
   def load() : RDD[(Int, Int, Option[Double], Double, Int)] = {
 
-    val lineitem = new File(getClass.getResource(path).getFile).getPath
-//    val fileLines = sc.textFile(lineitem)
-
-    val fileLines = Source.fromFile(new File(lineitem)).getLines()
+    val filePath = new File(getClass.getResource(path).getFile).getPath
+    val fileLines = sc.textFile(filePath)
 
     val data = fileLines.map(l => {
       val tokens = l.split('|')
@@ -36,10 +32,6 @@ class RatingsLoader(sc : SparkContext, path : String) extends Serializable {
       (idu, idt, Option.empty[Double], rating, timestamp)
     })
 
-    val rdd = sc.makeRDD(data.toSeq)
-    rdd.persist()
-
-//    data.persist()
-
+    data.persist()
   }
 }

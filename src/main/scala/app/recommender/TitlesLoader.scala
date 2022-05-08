@@ -22,10 +22,8 @@ class TitlesLoader(sc : SparkContext, path : String) extends Serializable {
    */
   def load(): RDD[(Int, String, List[String])] = {
 
-    val lineitem = new File(getClass.getResource(path).getFile).getPath
-//    val fileLines = sc.textFile(lineitem)
-
-    val fileLines = Source.fromFile(new File(lineitem)).getLines()
+    val filePath = new File(getClass.getResource(path).getFile).getPath
+    val fileLines = sc.textFile(filePath)
 
     val data = fileLines.map(l => {
       val tokens = l.split('|')
@@ -39,10 +37,6 @@ class TitlesLoader(sc : SparkContext, path : String) extends Serializable {
       (id, name, keywords.toList)
     })
 
-    val rdd = sc.makeRDD(data.toSeq)
-    rdd.persist()
-
-//    data.persist()
-
+    data.persist()
   }
 }
