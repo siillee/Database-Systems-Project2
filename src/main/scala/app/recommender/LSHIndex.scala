@@ -26,7 +26,7 @@ class LSHIndex(data: RDD[(Int, String, List[String])], seed : IndexedSeq[Int]) e
     hashed.map(el => (el._2._1, el._2._2))
       .groupBy(el => el._1)
       .map(el => (el._1, el._2.map(x => x._2).toList))
-      .partitionBy(new HashPartitioner(hashed.getNumPartitions))
+      .partitionBy(new HashPartitioner(hashed.getNumPartitions)).cache()
 
   /**
    * Hash function for an RDD of queries.

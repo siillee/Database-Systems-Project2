@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="362c7e83-9e2f-45d8-988c-4d55504e2a93" name="Changes" comment="Task 3 implemented">
+    <list default="true" id="362c7e83-9e2f-45d8-988c-4d55504e2a93" name="Changes" comment="Task 3 : implemented partitioning and fixed some errors in code">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/app/aggregator/Aggregator.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/app/aggregator/Aggregator.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/scala/app/recommender/LSHIndex.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/app/recommender/LSHIndex.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/app/recommender/NNLookupWithCache.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/app/recommender/NNLookupWithCache.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -159,7 +157,14 @@
       <option name="project" value="LOCAL" />
       <updated>1652031418990</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Task 3 : implemented partitioning and fixed some errors in code">
+      <created>1652347237369</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1652347237370</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -176,6 +181,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Tasks 1 and 2 implemented" />
     <MESSAGE value="Task 3 implemented" />
-    <option name="LAST_COMMIT_MESSAGE" value="Task 3 implemented" />
+    <MESSAGE value="Task 3 : implemented partitioning and fixed some errors in code" />
+    <option name="LAST_COMMIT_MESSAGE" value="Task 3 : implemented partitioning and fixed some errors in code" />
   </component>
 </project>
