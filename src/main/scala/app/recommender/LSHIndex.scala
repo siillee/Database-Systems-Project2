@@ -1,5 +1,6 @@
 package app.recommender
 
+import org.apache.spark.HashPartitioner
 import org.apache.spark.rdd.RDD
 
 import scala.reflect.ClassTag
@@ -12,6 +13,20 @@ import scala.reflect.ClassTag
  */
 class LSHIndex(data: RDD[(Int, String, List[String])], seed : IndexedSeq[Int]) extends Serializable {
   private val minhash = new MinHash(seed)
+
+  // distinct() is needed because there is a chance to have same films appear twice due to the way I keyed and joined the elements
+  val hashed :  RDD[(List[String], (IndexedSeq[Int], (Int, String, List[String])))] =
+    hash(data.map(el => el._3))
+      .keyBy(el => el._2)
+      .map(el => (el._1, el._2._1))
+      .join(data.keyBy(el => el._3))
+      .distinct()
+  // cache for the partitioning by signature
+  val cache : RDD[(IndexedSeq[Int], List[(Int, String, List[String])])] =
+    hashed.map(el => (el._2._1, el._2._2))
+      .groupBy(el => el._1)
+      .map(el => (el._1, el._2.map(x => x._2).toList))
+      .partitionBy(new HashPartitioner(hashed.getNumPartitions))
 
   /**
    * Hash function for an RDD of queries.
@@ -31,10 +46,7 @@ class LSHIndex(data: RDD[(Int, String, List[String])], seed : IndexedSeq[Int]) e
   def getBuckets()
     : RDD[(IndexedSeq[Int], List[(Int, String, List[String])])] = {
 
-    // distinct() is needed because there is a chance to have same films appear twice due to the way I keyed and joined the elements
-    val hashed = hash(data.map(el => el._3)).keyBy(el => el._2).map(el => (el._1, el._2._1)).join(data.keyBy(el => el._3)).distinct()
-
-    hashed.map(el => (el._2._1, el._2._2)).groupBy(el => el._1).map(el => (el._1, el._2.map(x => x._2).toList))
+    cache
   }
 
   /**

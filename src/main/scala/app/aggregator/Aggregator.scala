@@ -36,7 +36,9 @@ class Aggregator(sc : SparkContext) extends Serializable {
         (a._1 + sum, a._2 + b.size)
       }, (c, d) => (c._1 + d._1, c._2 + d._2)).union(zeroRatings)
 
-    state = aggregated.join(title.keyBy(el => el._1)).map(el => (el._1, el._2._2._2, el._2._1, el._2._2._3))
+    state = aggregated.join(title.keyBy(el => el._1))
+      .map(el => (el._1, el._2._2._2, el._2._1, el._2._2._3))
+
     state.persist()
   }
 
