@@ -52,7 +52,6 @@ class NNLookupWithCache(lshIndex : LSHIndex) extends Serializable {
   def cacheLookup(queries: RDD[List[String]])
   : (RDD[(List[String], List[(Int, String, List[String])])], RDD[(IndexedSeq[Int], List[String])]) = {
 
-    val sc = queries.sparkContext
     val hashed = lshIndex.hash(queries)
 
     if (cache == null){
@@ -67,14 +66,12 @@ class NNLookupWithCache(lshIndex : LSHIndex) extends Serializable {
       histogram(el._1) = histogram(el._1) + 1
     })
 
-    val hashedList = hashed.collect().toList
     val cacheMap = cache.value
 
-    val hit = sc.makeRDD(hashedList
-      .filter(el => cacheMap.contains(el._1))
-      .map(el => (el._2, cacheMap(el._1))))
+    val hit = hashed.filter(el => cacheMap.contains(el._1))
+                    .map(el => (el._2, cacheMap(el._1)))
 
-    val missed = sc.parallelize(hashedList.filter(el => !cacheMap.contains(el._1)))
+    val missed = hashed.filter(el => !cacheMap.contains(el._1))
 
     (hit, missed)
   }

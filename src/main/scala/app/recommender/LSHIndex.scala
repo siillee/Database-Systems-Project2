@@ -14,13 +14,15 @@ import scala.reflect.ClassTag
 class LSHIndex(data: RDD[(Int, String, List[String])], seed : IndexedSeq[Int]) extends Serializable {
   private val minhash = new MinHash(seed)
 
-  // distinct() is needed because there is a chance to have same films appear twice due to the way I keyed and joined the elements
+  // distinct() is needed because there is a chance to have same films appear twice due to the way I keyed and joined the elements,
+  // it is called first (before other transformations) in order to have better performance
   val hashed :  RDD[(List[String], (IndexedSeq[Int], (Int, String, List[String])))] =
     hash(data.map(el => el._3))
+      .distinct()
       .keyBy(el => el._2)
       .map(el => (el._1, el._2._1))
       .join(data.keyBy(el => el._3))
-      .distinct()
+
   // cache for the partitioning by signature
   val cache : RDD[(IndexedSeq[Int], List[(Int, String, List[String])])] =
     hashed.map(el => (el._2._1, el._2._2))
