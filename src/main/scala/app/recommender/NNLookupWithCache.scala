@@ -67,6 +67,7 @@ class NNLookupWithCache(lshIndex : LSHIndex) extends Serializable {
     })
 
     val cacheMap = cache.value
+
     val hit = hashed.filter(el => cacheMap.contains(el._1))
                     .map(el => (el._2, cacheMap(el._1)))
 

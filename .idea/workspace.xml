@@ -6,8 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="362c7e83-9e2f-45d8-988c-4d55504e2a93" name="Changes" comment="Removed unnecessary collect in NNLookupWithCache and made the distinct() more efficient in LSHIndex constructor">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/app/Main.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/app/Main.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/app/aggregator/RatingsLoader.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/app/aggregator/RatingsLoader.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/scala/app/recommender/LSHIndex.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/app/recommender/LSHIndex.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/scala/app/recommender/NNLookupWithCache.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/app/recommender/NNLookupWithCache.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/app/recommender/TitlesLoader.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/app/recommender/TitlesLoader.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -180,7 +183,14 @@
       <option name="project" value="LOCAL" />
       <updated>1653053391957</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Removed unnecessary collect in NNLookupWithCache and made the distinct() more efficient in LSHIndex constructor">
+      <created>1653053688115</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1653053688115</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

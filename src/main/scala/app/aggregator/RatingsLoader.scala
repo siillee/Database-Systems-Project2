@@ -21,6 +21,7 @@ class RatingsLoader(sc : SparkContext, path : String) extends Serializable {
   def load() : RDD[(Int, Int, Option[Double], Double, Int)] = {
 
     val filePath = new File(getClass.getResource(path).getFile).getPath
+//    val filePath = path
     val fileLines = sc.textFile(filePath)
 
     val data = fileLines.map(l => {

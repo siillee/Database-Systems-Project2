@@ -23,6 +23,7 @@ class TitlesLoader(sc : SparkContext, path : String) extends Serializable {
   def load(): RDD[(Int, String, List[String])] = {
 
     val filePath = new File(getClass.getResource(path).getFile).getPath
+//    val filePath = path
     val fileLines = sc.textFile(filePath)
 
     val data = fileLines.map(l => {
