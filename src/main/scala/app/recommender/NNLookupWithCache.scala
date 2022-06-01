@@ -14,7 +14,7 @@ import scala.collection.mutable
 class NNLookupWithCache(lshIndex : LSHIndex) extends Serializable {
   var cache : Broadcast[Map[IndexedSeq[Int], List[(Int, String, List[String])]]] = null
   var histogram : mutable.Map[IndexedSeq[Int], Int] = mutable.Map[IndexedSeq[Int], Int]()
-  var count : Long = 0
+  var signatureCount : Long = 0
   /**
    * The operation for building the cache
    *
@@ -22,11 +22,11 @@ class NNLookupWithCache(lshIndex : LSHIndex) extends Serializable {
    */
   def build(sc : SparkContext) = {
 
-    val frequent = histogram.filter(el => el._2 / count > 0.01).keys.toList
+    val frequent = histogram.filter(el => el._2 / signatureCount > 0.01).keys.toList
     val data = lshIndex.getBuckets()
     cache = sc.broadcast(data.filter(el => frequent.contains(el._1)).collect().toMap)
     histogram.clear()
-    count = 0
+    signatureCount = 0
   }
 
   /**
@@ -58,7 +58,7 @@ class NNLookupWithCache(lshIndex : LSHIndex) extends Serializable {
       return (null, hashed)
     }
     // Updating the histogram
-    count = count + hashed.count()
+    signatureCount = signatureCount + hashed.map(el => el._1).distinct().count()
     hashed.foreach(el => {
       if (!histogram.contains(el._1)) {
        histogram += ((el._1, 0))
