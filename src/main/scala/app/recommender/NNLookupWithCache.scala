@@ -58,7 +58,7 @@ class NNLookupWithCache(lshIndex : LSHIndex) extends Serializable {
       return (null, hashed)
     }
     // Updating the histogram
-    signatureCount = signatureCount + hashed.map(el => el._1).distinct().count()
+    signatureCount = signatureCount + hashed.count()
     hashed.foreach(el => {
       if (!histogram.contains(el._1)) {
        histogram += ((el._1, 0))
